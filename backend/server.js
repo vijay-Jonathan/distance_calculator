@@ -48,6 +48,28 @@ app.post('/calculate', async (req, res) => {
   }
 });
 
+// Endpoint for address autocomplete
+app.get('/autocomplete', async (req, res) => {
+  const { input } = req.query;
+  try {
+    const response = await axios.get(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(input)}&format=json&addressdetails=1&limit=5`, {
+      headers: {
+        'Accept-Language': 'en'
+      }
+    });
+    const suggestions = response.data.map((result) => ({
+      display_name: result.display_name,
+      lat: result.lat,
+      lon: result.lon,
+    }));
+    res.json(suggestions);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch address suggestions' });
+  }
+});
+
+
+
 // Endpoint to get past queries
 app.get('/history', async (req, res) => {
   try {
