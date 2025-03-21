@@ -9,9 +9,7 @@ const DistanceCalculator = ({ userId, onLogout }) => {
   const [error, setError] = useState("");
   const [history, setHistory] = useState([]);
   const [username, setUsername] = useState("");
-  const [metric, setMetric] = useState("km");
-  const [sourceSuggestions, setSourceSuggestions] = useState([]);
-  const [destinationSuggestions, setDestinationSuggestions] = useState([]);
+  const [metric, setMetric] = useState("km"); // Distance metric state
 
   useEffect(() => {
     fetchHistory();
@@ -35,12 +33,10 @@ const DistanceCalculator = ({ userId, onLogout }) => {
         "http://localhost:4000/calculate",
         { source, destination, metric },
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        },
       );
-      setDistance(response.data.distance); // API returns distance based on selected metric
+      setDistance(response.data.distance); // API returns distance in km
       setError("");
       fetchHistory();
     } catch (err) {
@@ -57,32 +53,6 @@ const DistanceCalculator = ({ userId, onLogout }) => {
       setHistory(response.data);
     } catch (err) {
       setError("Failed to fetch history");
-    }
-  };
-
-  const handleSourceChange = async (e) => {
-    setSource(e.target.value);
-    if (e.target.value.length > 2) {
-      const response = await axios.get('http://localhost:4000/autocomplete', {
-        params: { input: e.target.value },
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
-      setSourceSuggestions(response.data);
-    } else {
-      setSourceSuggestions([]);
-    }
-  };
-
-  const handleDestinationChange = async (e) => {
-    setDestination(e.target.value);
-    if (e.target.value.length > 2) {
-      const response = await axios.get('http://localhost:4000/autocomplete', {
-        params: { input: e.target.value },
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-      });
-      setDestinationSuggestions(response.data);
-    } else {
-      setDestinationSuggestions([]);
     }
   };
 
@@ -121,28 +91,6 @@ const DistanceCalculator = ({ userId, onLogout }) => {
           .radio-input:checked + .radio-text {
             color: #00ffff;
             font-weight: 500;
-          }
-
-          .suggestions-list {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-            border: 1px solid #ccc;
-            max-height: 150px;
-            overflow-y: auto;
-            background-color: #fff;
-            z-index: 1;
-            position: absolute;
-            width: 100%;
-          }
-
-          .suggestions-list li {
-            padding: 10px;
-            cursor: pointer;
-          }
-
-          .suggestions-list li:hover {
-            background-color: #f0f0f0;
           }
         `}
       </style>
@@ -209,47 +157,30 @@ const DistanceCalculator = ({ userId, onLogout }) => {
             type="text"
             placeholder="Source Address"
             value={source}
-            onChange={handleSourceChange}
+            onChange={(e) => setSource(e.target.value)}
             className="calculator-input"
           />
-          {sourceSuggestions.length > 0 && (
-            <ul className="suggestions-list">
-              {sourceSuggestions.map((suggestion, index) => (
-                <li key={index} onClick={() => setSource(suggestion.display_name)}>
-                  {suggestion.display_name}
-                </li>
-              ))}
-            </ul>
-          )}
           <input
             type="text"
             placeholder="Destination Address"
             value={destination}
-            onChange={handleDestinationChange}
+            onChange={(e) => setDestination(e.target.value)}
             className="calculator-input"
           />
-          {destinationSuggestions.length > 0 && (
-            <ul className="suggestions-list">
-              {destinationSuggestions.map((suggestion, index) => (
-                <li key={index} onClick={() => setDestination(suggestion.display_name)}>
-                  {suggestion.display_name}
-                </li>
-              ))}
-            </ul>
-          )}
           <button onClick={handleCalculate} className="calculate-button">
             Calculate Distance
           </button>
-
-          {error && <p className="error-message">{error}</p>}
-          {distance && (
-            <p className="distance-result">
-              Distance: {metric === "km" && `${distance} km`}
-              {metric === "miles" && `${(distance * 0.621371).toFixed(2)} miles`}
-              {metric === "both" && `${distance} km (${(distance * 0.621371).toFixed(2)} miles)`}
-            </p>
-          )}
         </div>
+
+        {error && <p className="error-message">{error}</p>}
+        {distance && (
+          <p className="distance-result">
+            Distance: {metric === "km" && `${distance} km`}
+            {metric === "miles" && `${(distance * 0.621371).toFixed(2)} miles`}
+            {metric === "both" &&
+              `${distance} km (${(distance * 0.621371).toFixed(2)} miles)`}
+          </p>
+        )}
       </div>
     </div>
   );
