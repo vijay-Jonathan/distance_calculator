@@ -1,3 +1,16 @@
+/**
+ * Distance Calculator API Server
+ * 
+ * This Express server provides endpoints for calculating distances between locations,
+ * managing user authentication, and storing calculation history.
+ * 
+ * Features:
+ * - Distance calculation using Haversine formula
+ * - Address autocomplete using OpenStreetMap Nominatim API
+ * - MongoDB integration for storing calculation history
+ * - User authentication
+ */
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -17,13 +30,17 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTop
   .then(() => console.log('MongoDB connected...'))
   .catch(err => console.log('MongoDB connection error:', err));
 
-  // Routes
+// Routes
 app.use('/api/auth', require('./routes/auth'));
 
 // Import models
 const Query = require('./models/query');
 
-// Endpoint to calculate distance
+/**
+ * Endpoint to calculate distance between two locations
+ * @param {object} req - Express request object
+ * @param {object} res - Express response object
+ */
 app.post('/calculate', async (req, res) => {
   const { source, destination } = req.body;
   try {
@@ -48,7 +65,11 @@ app.post('/calculate', async (req, res) => {
   }
 });
 
-// Endpoint for address autocomplete
+/**
+ * Endpoint for address autocomplete
+ * @param {object} req - Express request object
+ * @param {object} res - Express response object
+ */
 app.get('/autocomplete', async (req, res) => {
   const { input } = req.query;
   try {
@@ -68,9 +89,11 @@ app.get('/autocomplete', async (req, res) => {
   }
 });
 
-
-
-// Endpoint to get past queries
+/**
+ * Endpoint to get past queries
+ * @param {object} req - Express request object
+ * @param {object} res - Express response object
+ */
 app.get('/history', async (req, res) => {
   try {
     const queries = await Query.find().sort({ createdAt: -1 });
@@ -80,7 +103,14 @@ app.get('/history', async (req, res) => {
   }
 });
 
-// Function to calculate distance
+/**
+ * Calculate distance between two points using Haversine formula
+ * @param {number} lat1 - Latitude of first point
+ * @param {number} lon1 - Longitude of first point
+ * @param {number} lat2 - Latitude of second point
+ * @param {number} lon2 - Longitude of second point
+ * @returns {number} Distance in kilometers
+ */
 function calculateDistance(lat1, lon1, lat2, lon2) {
   const R = 6371; // Radius of the Earth in km
   const dLat = (lat2 - lat1) * (Math.PI / 180);

@@ -1,8 +1,21 @@
+/**
+ * DistanceCalculator Component
+ * 
+ * A React component that provides a user interface for calculating distances between
+ * two locations. It includes features like address input, distance calculation,
+ * metric selection (km/miles), and viewing calculation history.
+ * 
+ * Props:
+ * @param {string} userId - The ID of the currently logged in user
+ * @param {function} onLogout - Callback function to handle user logout
+ */
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
 const DistanceCalculator = ({ userId, onLogout }) => {
+  // State management for form inputs and data
   const [source, setSource] = useState("");
   const [destination, setDestination] = useState("");
   const [distance, setDistance] = useState(null);
@@ -16,6 +29,9 @@ const DistanceCalculator = ({ userId, onLogout }) => {
     fetchUserData();
   }, []);
 
+  /**
+   * Fetches user data from the backend API
+   */
   const fetchUserData = async () => {
     try {
       const response = await axios.get("http://localhost:4000/api/auth/user", {
@@ -27,6 +43,10 @@ const DistanceCalculator = ({ userId, onLogout }) => {
     }
   };
 
+  /**
+   * Handles the distance calculation
+   * Makes API request to calculate distance between source and destination
+   */
   const handleCalculate = async () => {
     try {
       const response = await axios.post(
@@ -45,6 +65,9 @@ const DistanceCalculator = ({ userId, onLogout }) => {
     }
   };
 
+  /**
+   * Fetches calculation history from the backend API
+   */
   const fetchHistory = async () => {
     try {
       const response = await axios.get("http://localhost:4000/history", {

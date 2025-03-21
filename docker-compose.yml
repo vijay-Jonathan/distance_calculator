@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # MongoDB service
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=example
+    volumes:
+      - mongodb_data:/data/db
+    ports:
+      - "27017:27017"
+
+  # Backend service
+  backend:
+    build: ./backend
+    container_name: backend
+    restart: always
+    environment:
+      - MONGODB_URI=mongodb://root:example@mongodb:27017/distance_calculator?authSource=admin
+      - JWT_SECRET=your_jwt_secret
+      - PORT=4000
+    depends_on:
+      - mongodb
+    ports:
+      - "4000:4000"
+
+  # Frontend service
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongodb_data:
