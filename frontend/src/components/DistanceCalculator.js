@@ -9,6 +9,7 @@ const DistanceCalculator = ({ userId, onLogout }) => {
   const [error, setError] = useState("");
   const [history, setHistory] = useState([]);
   const [username, setUsername] = useState("");
+  const [metric, setMetric] = useState("km"); // Distance metric state
 
   useEffect(() => {
     fetchHistory();
@@ -30,12 +31,12 @@ const DistanceCalculator = ({ userId, onLogout }) => {
     try {
       const response = await axios.post(
         "http://localhost:4000/calculate",
-        { source, destination },
+        { source, destination, metric },
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         },
       );
-      setDistance(response.data.distance);
+      setDistance(response.data.distance); // API returns distance in km
       setError("");
       fetchHistory();
     } catch (err) {
@@ -57,6 +58,42 @@ const DistanceCalculator = ({ userId, onLogout }) => {
 
   return (
     <div className="calculator-page">
+      <style>
+        {`
+          .mode-selector {
+            margin-bottom: 20px;
+            width: 100%;
+          }
+
+          .radio-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+          }
+
+          .radio-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+          }
+
+          .radio-input {
+            margin-right: 8px;
+            cursor: pointer;
+          }
+
+          .radio-text {
+            font-size: 16px;
+            color: #ffffff;
+          }
+
+          .radio-input:checked + .radio-text {
+            color: #00ffff;
+            font-weight: 500;
+          }
+        `}
+      </style>
       <nav className="calculator-nav">
         <div className="nav-content">
           <h2>Distance Calculator</h2>
@@ -79,6 +116,43 @@ const DistanceCalculator = ({ userId, onLogout }) => {
 
       <div className="calculator-container">
         <div className="calculator-form">
+          <div className="mode-selector">
+            <div className="radio-group">
+              <label className="radio-label">
+                <input
+                  type="radio"
+                  name="metric"
+                  value="km"
+                  checked={metric === "km"}
+                  onChange={(e) => setMetric(e.target.value)}
+                  className="radio-input"
+                />
+                <span className="radio-text">Kilometers</span>
+              </label>
+              <label className="radio-label">
+                <input
+                  type="radio"
+                  name="metric"
+                  value="miles"
+                  checked={metric === "miles"}
+                  onChange={(e) => setMetric(e.target.value)}
+                  className="radio-input"
+                />
+                <span className="radio-text">Miles</span>
+              </label>
+              <label className="radio-label">
+                <input
+                  type="radio"
+                  name="metric"
+                  value="both"
+                  checked={metric === "both"}
+                  onChange={(e) => setMetric(e.target.value)}
+                  className="radio-input"
+                />
+                <span className="radio-text">Both</span>
+              </label>
+            </div>
+          </div>
           <input
             type="text"
             placeholder="Source Address"
@@ -99,7 +173,14 @@ const DistanceCalculator = ({ userId, onLogout }) => {
         </div>
 
         {error && <p className="error-message">{error}</p>}
-        {distance && <p className="distance-result">Distance: {distance} km</p>}
+        {distance && (
+          <p className="distance-result">
+            Distance: {metric === "km" && `${distance} km`}
+            {metric === "miles" && `${(distance * 0.621371).toFixed(2)} miles`}
+            {metric === "both" &&
+              `${distance} km (${(distance * 0.621371).toFixed(2)} miles)`}
+          </p>
+        )}
       </div>
     </div>
   );

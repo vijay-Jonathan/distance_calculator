@@ -65,7 +65,8 @@ const History = ({ userId, onLogout }) => {
               <tr>
                 <th>Source</th>
                 <th>Destination</th>
-                <th>Distance</th>
+                <th>Distance (km)</th>
+                <th>Distance (miles)</th>
                 <th>Date</th>
               </tr>
             </thead>
@@ -75,6 +76,7 @@ const History = ({ userId, onLogout }) => {
                   <td>{item.source}</td>
                   <td>{item.destination}</td>
                   <td>{item.distance} km</td>
+                  <td>{(item.distance * 0.621371).toFixed(2)} miles</td>
                   <td>{new Date(item.timestamp).toLocaleDateString()}</td>
                 </tr>
               ))}
