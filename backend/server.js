@@ -32,6 +32,8 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTop
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api', require('./routes/calculate'));
+app.use('/api', require('./routes/history'));
 
 // Import models
 const Query = require('./models/query');

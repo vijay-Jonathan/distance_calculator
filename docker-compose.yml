@@ -1,18 +1,18 @@
 version: '3.8'
 
 services:
-  # MongoDB service
-  mongodb:
-    image: mongo:latest
-    container_name: mongodb
-    restart: always
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=example
-    volumes:
-      - mongodb_data:/data/db
-    ports:
-      - "27017:27017"
+  # MongoDB service for Local
+  # mongodb:
+  #   image: mongo:latest
+  #   container_name: mongodb
+  #   restart: always
+  #   environment:
+  #     - MONGO_INITDB_ROOT_USERNAME=root
+  #     - MONGO_INITDB_ROOT_PASSWORD=example
+  #   volumes:
+  #     - mongodb_data:/data/db
+  #   ports:
+  #     - "27017:27017"
 
   # Backend service
   backend:
@@ -20,11 +20,11 @@ services:
     container_name: backend
     restart: always
     environment:
-      - MONGODB_URI=mongodb://root:example@mongodb:27017/distance_calculator?authSource=admin
+      - MONGODB_URI=mongodb+srv://vijay143:vijay143@cluster0.93lyh.mongodb.net/distance_calculator?retryWrites=true&w=majority
       - JWT_SECRET=your_jwt_secret
       - PORT=4000
-    depends_on:
-      - mongodb
+    # depends_on:
+    #   - mongodb
     ports:
       - "4000:4000"
 
@@ -38,5 +38,5 @@ services:
     depends_on:
       - backend
 
-volumes:
-  mongodb_data:
+# volumes:
+#   mongodb_data:
