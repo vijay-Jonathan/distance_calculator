@@ -13,7 +13,7 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`https://distance-calculator-9lj3.onrender.com/api/auth/register`, {
+      await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/auth/register`, {
         username,
         email,
         password,
