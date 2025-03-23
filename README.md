@@ -150,6 +150,58 @@ distance_calculator/
 - GET `/autocomplete` - Get address suggestions
 - GET `/history` - Get calculation history
 
+## Deployment
+
+### Frontend Deployment
+
+The frontend can be deployed using Docker with environment variables for backend configuration:
+
+```dockerfile
+# Build stage
+FROM node:18-alpine as build
+WORKDIR /usr/src/app
+COPY package*.json ./
+RUN npm install
+COPY . .
+RUN npm run build
+
+# Production stage
+FROM nginx:alpine
+COPY --from=build /usr/src/app/build /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf.template
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+EXPOSE 80
+ENTRYPOINT ["/docker-entrypoint.sh"]
+```
+
+To build and run the frontend container:
+```bash
+# Build the image
+docker build -t frontend .
+
+# Run with environment variable for backend URL
+docker run -p 80:80 -e REACT_APP_BACKEND_URL=https://your-backend-url.com frontend
+```
+
+The nginx configuration uses environment variables for flexible backend routing:
+```nginx
+# Proxy API requests to backend
+location /api {
+    proxy_pass ${REACT_APP_BACKEND_URL};
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host $host;
+    proxy_cache_bypass $http_upgrade;
+}
+```
+
+This setup allows you to:
+- Deploy the same frontend image to different environments
+- Change backend URL without rebuilding the image
+- Maintain secure configuration through environment variables
+
 ## Docker Configuration
 
 ### Frontend Dockerfile
