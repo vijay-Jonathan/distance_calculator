@@ -14,7 +14,7 @@ const History = ({ userId, onLogout }) => {
 
   const fetchUserData = async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/auth/user`, {
+      const response = await axios.get('/api/auth/user', {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setUsername(response.data.username || response.data.email);
@@ -25,7 +25,7 @@ const History = ({ userId, onLogout }) => {
 
   const fetchHistory = async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/history`, {
+      const response = await axios.get('/history', {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setHistory(response.data);

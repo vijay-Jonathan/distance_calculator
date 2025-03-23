@@ -12,7 +12,7 @@ const Login = ({ onLogin }) => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_BACKEND_URL}/api/auth/login`,
+        '/api/auth/login',
         { email, password },
       );
       onLogin(response.data.token);
