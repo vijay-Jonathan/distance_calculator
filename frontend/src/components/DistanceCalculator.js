@@ -34,7 +34,7 @@ const DistanceCalculator = ({ userId, onLogout }) => {
    */
   const fetchUserData = async () => {
     try {
-      const response = await axios.get('/api/auth/user', {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/auth/user`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setUsername(response.data.username || response.data.email);
@@ -50,7 +50,7 @@ const DistanceCalculator = ({ userId, onLogout }) => {
   const handleCalculate = async () => {
     try {
       const response = await axios.post(
-        '/calculate',
+        `${process.env.REACT_APP_BACKEND_URL}/calculate`,
         { source, destination, metric },
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -70,7 +70,7 @@ const DistanceCalculator = ({ userId, onLogout }) => {
    */
   const fetchHistory = async () => {
     try {
-      const response = await axios.get('/history', {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/history`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setHistory(response.data);
