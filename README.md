@@ -352,8 +352,6 @@ The backend follows a modular Express.js architecture with these key components:
 
 ## System Design Diagram
 
-<!-- ![System Design Diagram](/system-design.png) -->
-
 ```
 ┌─────────────────┐      ┌────────────────────────────────────────────┐
 │                 │      │              Backend Server                 │
@@ -363,10 +361,10 @@ The backend follows a modular Express.js architecture with these key components:
                          │  └──────────┘  └─────────┘  └─────────┘    │
                          │         │            │            │        │
                          │  ┌──────▼────────────▼────────────▼──────┐ │
-                         │  │              Middleware              │ │
-                         │  │  - Authentication                    │ │
-                         │  │  - Error Handling                    │ │
-                         │  │  - Request Logging                   │ │
+                         │  │           Security Layer              │ │
+                         │  │  - Input Validation                   │ │
+                         │  │  - Rate Limiting                      │ │
+                         │  │  - Error Handling                     │ │
                          │  └──────────────────┬──────────────────┘ │
                          │                     │                     │
                          └─────────────────────┼─────────────────────┘
@@ -380,7 +378,99 @@ The backend follows a modular Express.js architecture with these key components:
           │     Database    │      │                  │     │  Calculation      │
           │                 │      │                  │     │  Service          │
           └─────────────────┘      └──────────────────┘     └───────────────────┘
-```          
+```
+
+## Security Implementation
+
+The application implements several security measures to ensure data integrity and prevent common attacks:
+
+### 1. Input Validation
+- **Address Validation**
+  ```javascript
+  // Validates addresses against injection attacks
+  function validateAddress(address) {
+    // Length constraints (3-200 characters)
+    if (address.length < 3 || address.length > 200) return false;
+    // Only allows alphanumeric characters and basic punctuation
+    return /^[a-zA-Z0-9\s,.-]+$/.test(address);
+  }
+  ```
+
+- **Coordinate Validation**
+  ```javascript
+  // Ensures coordinates are within valid ranges
+  function validateCoordinates(lat, lon) {
+    if (lat < -90 || lat > 90) return false;    // Latitude range
+    if (lon < -180 || lon > 180) return false;  // Longitude range
+    return true;
+  }
+  ```
+
+### 2. Protection Against Common Attacks
+- **XSS (Cross-Site Scripting)**
+  - Input sanitization
+  - Strict character validation
+  - HTML/Script tag rejection
+
+- **Injection Attacks**
+  - SQL injection prevention
+  - NoSQL injection prevention
+  - Command injection prevention
+  - Path traversal protection
+
+### 3. Rate Limiting
+- 1-second delay between geocoding requests
+- Respects Nominatim API usage policy
+- Prevents API abuse
+
+### 4. Error Handling
+- Sanitized error messages
+- No internal error exposure
+- Appropriate HTTP status codes
+
+### 5. Security Test Suite
+The application includes comprehensive security tests:
+
+```javascript
+describe('Security Tests', () => {
+  // XSS Prevention
+  test('Should reject XSS attempts', async () => {
+    const response = await request(app)
+      .post('/calculate')
+      .send({
+        source: '<script>alert("xss")</script>',
+        destination: 'New York'
+      });
+    expect(response.status).toBe(400);
+  });
+
+  // Injection Prevention
+  test('Should reject SQL injection', async () => {
+    const response = await request(app)
+      .post('/calculate')
+      .send({
+        source: "'; DROP TABLE users; --",
+        destination: 'New York'
+      });
+    expect(response.status).toBe(400);
+  });
+
+  // More tests available in /backend/tests/security.test.js
+});
+```
+
+To run security tests:
+```bash
+cd backend
+npm test tests/security.test.js
+```
+
+### 6. Additional Security Measures
+- HTTPS support for production
+- JWT authentication for protected routes
+- Secure password hashing
+- CORS configuration
+- Regular security updates
 
 ## Scalability Considerations
 

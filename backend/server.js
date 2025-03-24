@@ -235,3 +235,10 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+
+// Export app and validation functions for testing
+module.exports = {
+  app,
+  validateAddress,
+  validateCoordinates
+};
