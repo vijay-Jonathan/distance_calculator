@@ -39,31 +39,126 @@ app.use('/api', require('./routes/history'));
 const Query = require('./models/query');
 
 /**
+ * Validate address string to prevent injection attacks
+ * @param {string} address - Address to validate
+ * @returns {boolean} - True if address is valid
+ */
+function validateAddress(address) {
+  // Check if address is provided and is a string
+  if (!address || typeof address !== 'string') {
+    return false;
+  }
+
+  // Check length constraints
+  if (address.length < 3 || address.length > 200) {
+    return false;
+  }
+
+  // Only allow alphanumeric characters, spaces, commas, periods, and basic punctuation
+  const validAddressRegex = /^[a-zA-Z0-9\s,.-]+$/;
+  return validAddressRegex.test(address);
+}
+
+/**
+ * Validate coordinates to prevent invalid calculations
+ * @param {number} lat - Latitude
+ * @param {number} lon - Longitude
+ * @returns {boolean} - True if coordinates are valid
+ */
+function validateCoordinates(lat, lon) {
+  // Check if coordinates are numbers
+  if (typeof lat !== 'number' || typeof lon !== 'number') {
+    return false;
+  }
+
+  // Check latitude range (-90 to 90)
+  if (lat < -90 || lat > 90) {
+    return false;
+  }
+
+  // Check longitude range (-180 to 180)
+  if (lon < -180 || lon > 180) {
+    return false;
+  }
+
+  return true;
+}
+
+/**
  * Endpoint to calculate distance between two locations
  * @param {object} req - Express request object
  * @param {object} res - Express response object
  */
 app.post('/calculate', async (req, res) => {
   const { source, destination } = req.body;
+
+  // Validate input addresses
+  if (!validateAddress(source) || !validateAddress(destination)) {
+    return res.status(400).json({ 
+      error: 'Invalid address format. Addresses must be between 3 and 200 characters and contain only letters, numbers, spaces, and basic punctuation.' 
+    });
+  }
+
   try {
-    const sourceData = await axios.get(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(source)}&format=json`);
-    const destinationData = await axios.get(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(destination)}&format=json`);
+    // Add delay between requests to respect rate limits
+    const sourceData = await axios.get(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(source)}&format=json`, {
+      headers: {
+        'User-Agent': 'DistanceCalculator/1.0'
+      }
+    });
+    
+    // Wait 1 second between requests to respect Nominatim's usage policy
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const destinationData = await axios.get(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(destination)}&format=json`, {
+      headers: {
+        'User-Agent': 'DistanceCalculator/1.0'
+      }
+    });
 
     if (sourceData.data.length === 0 || destinationData.data.length === 0) {
-      return res.status(400).json({ error: 'Invalid address' });
+      return res.status(400).json({ error: 'Address not found' });
     }
 
     const sourceCoords = sourceData.data[0];
     const destinationCoords = destinationData.data[0];
 
-    const distance = calculateDistance(sourceCoords.lat, sourceCoords.lon, destinationCoords.lat, destinationCoords.lon);
+    // Validate coordinates before calculation
+    if (!validateCoordinates(parseFloat(sourceCoords.lat), parseFloat(sourceCoords.lon)) ||
+        !validateCoordinates(parseFloat(destinationCoords.lat), parseFloat(destinationCoords.lon))) {
+      return res.status(400).json({ error: 'Invalid coordinates received from geocoding service' });
+    }
 
-    const query = new Query({ source, destination, distance });
+    const distance = calculateDistance(
+      parseFloat(sourceCoords.lat), 
+      parseFloat(sourceCoords.lon), 
+      parseFloat(destinationCoords.lat), 
+      parseFloat(destinationCoords.lon)
+    );
+
+    const query = new Query({ 
+      source, 
+      destination, 
+      distance,
+      sourceCoords: { lat: sourceCoords.lat, lon: sourceCoords.lon },
+      destinationCoords: { lat: destinationCoords.lat, lon: destinationCoords.lon }
+    });
     await query.save();
 
-    res.json({ distance });
+    res.json({ 
+      distance,
+      source: {
+        address: source,
+        coordinates: { lat: sourceCoords.lat, lon: sourceCoords.lon }
+      },
+      destination: {
+        address: destination,
+        coordinates: { lat: destinationCoords.lat, lon: destinationCoords.lon }
+      }
+    });
   } catch (error) {
-    res.status(500).json({ error: 'API request failed' });
+    console.error('Calculate endpoint error:', error);
+    res.status(500).json({ error: 'Failed to calculate distance' });
   }
 });
 
@@ -74,19 +169,31 @@ app.post('/calculate', async (req, res) => {
  */
 app.get('/autocomplete', async (req, res) => {
   const { input } = req.query;
+
+  // Validate input
+  if (!validateAddress(input)) {
+    return res.status(400).json({ 
+      error: 'Invalid input format. Search text must be between 3 and 200 characters and contain only letters, numbers, spaces, and basic punctuation.' 
+    });
+  }
+
   try {
     const response = await axios.get(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(input)}&format=json&addressdetails=1&limit=5`, {
       headers: {
+        'User-Agent': 'DistanceCalculator/1.0',
         'Accept-Language': 'en'
       }
     });
+    
     const suggestions = response.data.map((result) => ({
       display_name: result.display_name,
-      lat: result.lat,
-      lon: result.lon,
+      lat: parseFloat(result.lat),
+      lon: parseFloat(result.lon),
     }));
+    
     res.json(suggestions);
   } catch (error) {
+    console.error('Autocomplete endpoint error:', error);
     res.status(500).json({ error: 'Failed to fetch address suggestions' });
   }
 });
