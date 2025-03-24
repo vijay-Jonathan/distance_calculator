@@ -38,6 +38,28 @@ app.use('/api', require('./routes/history'));
 // Import models
 const Query = require('./models/query');
 
+// Array of funny quotes for 404 errors
+const funnyQuotes = [
+  "Oops! Looks like this page took a wrong turn at Albuquerque!",
+  "404: Page got lost in the Matrix. Take the blue pill and go back home.",
+  "Houston, we have a problem... This page doesn't exist!",
+  "This page is playing hide and seek... and it's winning!",
+  "Looks like someone divided by zero. Page not found!",
+  "Error 404: Page went on vacation without leaving a forwarding address.",
+  "This is not the page you're looking for... *waves hand like a Jedi*",
+  "Plot twist: This page exists in an alternate universe!",
+  "This page has been abducted by aliens. We're working on negotiations.",
+  "404: Page got stuck in traffic. Try another route!"
+];
+
+/**
+ * Get a random funny quote for 404 errors
+ * @returns {string} A random funny quote
+ */
+function getRandomQuote() {
+  return funnyQuotes[Math.floor(Math.random() * funnyQuotes.length)];
+}
+
 /**
  * Validate address string to prevent injection attacks
  * @param {string} address - Address to validate
@@ -231,6 +253,20 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   const distance = R * c; // Distance in km
   return distance;
 }
+
+// Custom 404 handler for any undefined routes
+app.use('*', (req, res) => {
+  res.status(404).json({
+    status: 404,
+    message: getRandomQuote(),
+    tip: "Try going back home or check if the URL is correct!",
+    availableEndpoints: [
+      "/calculate - Calculate distance between two locations",
+      "/autocomplete - Get address suggestions",
+      "/history - View calculation history"
+    ]
+  });
+});
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
