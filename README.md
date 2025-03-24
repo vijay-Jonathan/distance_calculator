@@ -139,6 +139,39 @@ distance_calculator/
 └── README.md
 ```
 
+## Running Locally
+
+To run the application locally:
+
+### Environment Variables Setup
+
+1. **Backend Configuration**:
+   - Navigate to the `backend` directory
+   - Copy the Sample.env file to create your own .env file:
+     ```
+     cp Sample.env .env
+     ```
+   - Edit the .env file to use local configurations:
+     - Update MongoDB connection string to your local instance
+     - Set JWT_SECRET to a secure random string
+     - Configure other environment-specific variables as needed
+   - Refer to `backend/Sample.env` for all required variables and examples
+
+2. **Frontend Configuration**:
+   - Navigate to the `frontend` directory
+   - Copy the Sample.env file to create your own .env file:
+     ```
+     cp Sample.env .env
+     ```
+   - Edit the .env file to point to your local backend:
+     - Set REACT_APP_API_URL to your local backend URL (e.g., http://localhost:4000)
+   - Refer to `frontend/Sample.env` for all required variables and examples
+
+3. **Start the Application**:
+   - Start the backend: `cd backend && npm start`
+   - Start the frontend: `cd frontend && npm start`
+   - The application should now be running at http://localhost:3000
+
 ## API Endpoints
 
 ### Authentication
@@ -274,3 +307,103 @@ volumes:
 3. Commit your changes
 4. Push to the branch
 5. Create a new Pull Request
+
+# System Design README
+
+## Core Architecture Decisions
+
+Looking at the distance calculator application, here's the system design and thought process behind the architectural choices:
+
+### 1. Backend Structure (Express.js Application)
+
+The backend follows a modular Express.js architecture with these key components:
+
+- **Route Separation**: Routes are separated into distinct files (`calculate.js`, `history.js`, `auth.js`) rather than keeping everything in server.js. This separation of concerns makes the codebase more maintainable and allows different developers to work on different features independently.
+
+- **Model-View-Controller Pattern**: Although not explicitly labeled, the code follows MVC principles with:
+  - Models: Database schemas (like the `Query` model)
+  - Controllers: Logic in route handlers
+  - Views: Handled by the frontend (separate from backend)
+
+- **Middleware Usage**: The authentication middleware protects routes that require user login, showing a good understanding of Express middleware patterns for cross-cutting concerns.
+
+### 2. External API Integration
+
+- **Nominatim**: Used for geocoding addresses into coordinates. This is a good choice for a prototype as it's free and doesn't require API keys, though it has rate limiting considerations for production.
+
+- **Calculation Logic**: The calculateDistance function implements the Haversine formula for calculating distances between geographic coordinates, keeping this complex math isolated in one place.
+
+### 3. Data Persistence
+
+- **MongoDB**: The application uses MongoDB as the database, which makes sense for this application because:
+  - The schema might evolve during development
+  - Query documents have a natural document structure
+  - You don't need complex joins between data
+
+### 4. Authentication
+
+- **JWT Authentication**: Using JSON Web Tokens for authentication, which provides a stateless authentication mechanism that works well with RESTful APIs.
+
+### 5. Deployment Strategy
+
+- **Docker Containerization**: The Dockerfiles and Docker Compose setup show a containerized approach that:
+  - Separates frontend and backend builds
+  - Uses Nginx to serve static frontend assets
+  - Provides development environment consistency
+
+## System Design Diagram
+
+<!-- ![System Design Diagram](/system-design.png) -->
+
+```
+┌─────────────────┐      ┌────────────────────────────────────────────┐
+│                 │      │              Backend Server                 │
+│   Web Browser   │◄────►│  ┌──────────┐  ┌─────────┐  ┌─────────┐    │
+│                 │      │  │   Auth   │  │Calculate│  │ History │    │
+└─────────────────┘      │  │ Endpoints│  │Endpoints│  │Endpoints│    │
+                         │  └──────────┘  └─────────┘  └─────────┘    │
+                         │         │            │            │        │
+                         │  ┌──────▼────────────▼────────────▼──────┐ │
+                         │  │              Middleware              │ │
+                         │  │  - Authentication                    │ │
+                         │  │  - Error Handling                    │ │
+                         │  │  - Request Logging                   │ │
+                         │  └──────────────────┬──────────────────┘ │
+                         │                     │                     │
+                         └─────────────────────┼─────────────────────┘
+                                              │
+                                              │
+                   ┌─────────────────────────┼─────────────────────────┐
+                   │                         │                         │
+          ┌────────▼─────────┐      ┌────────▼─────────┐     ┌─────────▼────────┐
+          │                 │      │                  │     │                   │
+          │     MongoDB     │      │   Nominatim API  │     │  Distance         │
+          │     Database    │      │                  │     │  Calculation      │
+          │                 │      │                  │     │  Service          │
+          └─────────────────┘      └──────────────────┘     └───────────────────┘
+
+## Scalability Considerations
+
+The current design has some good foundations for scalability:
+
+1. **Stateless Backend**: The JWT approach creates a stateless backend that can easily scale horizontally.
+
+2. **Containerization**: Docker containers support easy deployment to container orchestration platforms.
+
+3. **Separated Concerns**: Clear separation between routes makes future microservice extraction possible.
+
+## Improvement Opportunities
+
+Based on the current architecture, here are some enhancements to consider:
+
+1. **Caching Layer**: Implement Redis to cache frequently requested routes or geocoding results.
+
+2. **Rate Limiting**: Add protection against API abuse, especially for the geocoding service which may have external limits.
+
+3. **Error Handling Enhancement**: Implement more granular error handling for different types of failures.
+
+4. **Background Processing**: For long-running tasks, consider adding a message queue system like RabbitMQ.
+
+5. **API Documentation**: Integrate Swagger/OpenAPI to automatically document your endpoints.
+
+The current architecture provides a solid foundation that balances simplicity with good software engineering practices, making it suitable for both development and potential scaling as needs grow.

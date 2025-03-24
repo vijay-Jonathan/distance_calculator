@@ -1,70 +1,109 @@
-# Getting Started with Create React App
+# Distance Calculator Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Overview
+React-based frontend for the Distance Calculator application. This web application provides a user-friendly interface for calculating distances between locations and viewing calculation history.
+
+## Features
+- User authentication (login/register)
+- Address search with autocomplete
+- Distance calculation between two locations
+- History tracking of calculations
+- Responsive design for mobile and desktop
+- Dark/Light theme support
+
+## Project Structure
+```
+frontend/
+├── public/
+│   ├── index.html
+│   └── assets/
+├── src/
+│   ├── components/    # Reusable UI components
+│   ├── pages/         # Page components
+│   ├── services/      # API service calls
+│   ├── context/       # React context
+│   ├── hooks/         # Custom hooks
+│   ├── utils/         # Utility functions
+│   └── App.js         # Main application component
+├── Dockerfile
+└── package.json
+```
+
+## Prerequisites
+- Node.js (v18 or higher)
+- npm or yarn
+- Backend service running
+
+## Environment Variables
+Copy the Sample.env file to create your own .env file:
+```bash
+cp Sample.env .env
+```
+
+Required environment variables:
+```
+REACT_APP_API_URL=http://localhost:4000
+```
+
+## Installation
+1. Install dependencies:
+```bash
+npm install
+```
+
+2. Set up environment variables (see above)
+
+3. Start the development server:
+```bash
+npm start
+```
+
+The application will be available at http://localhost:3000
 
 ## Available Scripts
+- `npm start` - Run development server
+- `npm test` - Run test suite
+- `npm run build` - Build for production
+- `npm run eject` - Eject from Create React App
 
-In the project directory, you can run:
+## Docker Support
+Build the Docker image:
+```bash
+docker build -t distance-calculator-frontend .
+```
 
-### `npm start`
+Run the container:
+```bash
+docker run -p 80:80 distance-calculator-frontend
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Features in Detail
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Authentication
+- User registration with email and password
+- JWT-based authentication
+- Protected routes for authenticated users
 
-### `npm test`
+### Distance Calculator
+- Address search with autocomplete suggestions
+- Real-time distance calculation
+- Support for various units (kilometers, miles)
+- Visual feedback during calculation
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### History Tracking
+- View past calculations
+- Sort and filter history
+- Delete individual history entries
 
-### `npm run build`
+## Browser Support
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## Contributing
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
