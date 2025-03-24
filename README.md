@@ -386,25 +386,7 @@ The application implements several security measures to ensure data integrity an
 
 ### 1. Input Validation
 - **Address Validation**
-  ```javascript
-  // Validates addresses against injection attacks
-  function validateAddress(address) {
-    // Length constraints (3-200 characters)
-    if (address.length < 3 || address.length > 200) return false;
-    // Only allows alphanumeric characters and basic punctuation
-    return /^[a-zA-Z0-9\s,.-]+$/.test(address);
-  }
-  ```
 
-- **Coordinate Validation**
-  ```javascript
-  // Ensures coordinates are within valid ranges
-  function validateCoordinates(lat, lon) {
-    if (lat < -90 || lat > 90) return false;    // Latitude range
-    if (lon < -180 || lon > 180) return false;  // Longitude range
-    return true;
-  }
-  ```
 
 ### 2. Protection Against Common Attacks
 - **XSS (Cross-Site Scripting)**
@@ -431,39 +413,15 @@ The application implements several security measures to ensure data integrity an
 ### 5. Security Test Suite
 The application includes comprehensive security tests:
 
-```javascript
-describe('Security Tests', () => {
-  // XSS Prevention
-  test('Should reject XSS attempts', async () => {
-    const response = await request(app)
-      .post('/calculate')
-      .send({
-        source: '<script>alert("xss")</script>',
-        destination: 'New York'
-      });
-    expect(response.status).toBe(400);
-  });
-
-  // Injection Prevention
-  test('Should reject SQL injection', async () => {
-    const response = await request(app)
-      .post('/calculate')
-      .send({
-        source: "'; DROP TABLE users; --",
-        destination: 'New York'
-      });
-    expect(response.status).toBe(400);
-  });
-
-  // More tests available in /backend/tests/security.test.js
-});
-```
 
 To run security tests:
 ```bash
 cd backend
 npm test tests/security.test.js
 ```
+###  Security Test Results
+![Security Test Results](./images/security_test_result.png)
+
 
 ### 6. Additional Security Measures
 - HTTPS support for production
@@ -497,3 +455,51 @@ Based on the current architecture, here are some enhancements to consider:
 5. **API Documentation**: Integrate Swagger/OpenAPI to automatically document your endpoints.
 
 The current architecture provides a solid foundation that balances simplicity with good software engineering practices, making it suitable for both development and potential scaling as needs grow.
+
+## Application Screenshots
+
+
+
+### 2. Distance Calculator
+![Distance Calculator](./images/calculate.png)
+```json
+{
+  "distance": 3862.4,
+  "source": {
+    "address": "New York, USA",
+    "coordinates": {
+      "lat": 40.7127281,
+      "lon": -74.0060152
+    }
+  },
+  "destination": {
+    "address": "Los Angeles, USA",
+    "coordinates": {
+      "lat": 34.0536909,
+      "lon": -118.242766
+    }
+  }
+}
+```
+
+### 3. History View
+![History View](./images/history.png)
+```json
+[
+  {
+    "_id": "65ff1234abcd5678ef901234",
+    "source": "New York, USA",
+    "destination": "Los Angeles, USA",
+    "distance": 3862.4,
+    "sourceCoords": {
+      "lat": 40.7127281,
+      "lon": -74.0060152
+    },
+    "destinationCoords": {
+      "lat": 34.0536909,
+      "lon": -118.242766
+    },
+    "createdAt": "2025-03-23T23:14:44.000Z"
+  },
+  // More history entries...
+]
