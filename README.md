@@ -312,7 +312,6 @@ volumes:
 
 ## Core Architecture Decisions
 
-Looking at the distance calculator application, here's the system design and thought process behind the architectural choices:
 
 ### 1. Backend Structure (Express.js Application)
 
@@ -381,6 +380,7 @@ The backend follows a modular Express.js architecture with these key components:
           │     Database    │      │                  │     │  Calculation      │
           │                 │      │                  │     │  Service          │
           └─────────────────┘      └──────────────────┘     └───────────────────┘
+```          
 
 ## Scalability Considerations
 
